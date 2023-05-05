@@ -1,22 +1,28 @@
-import psycopg2, re
+import psycopg2
+import re
 
 
 hostname = 'localhost'
-database = 'demo'
+database = 'suppliers'
 username = 'postgres'
-pwd = '1234'
+pwd = 'Dinmuhamed29.'
 port_id = 5432
+conn, cur = None, None
+
 
 conn = psycopg2.connect(
-     host = hostname,
-        dbname = database,
-        user = username,
-        password = pwd,
-        port = port_id
+      host = hostname,
+      dbname = database,
+      user = username,
+      password = pwd,
+      port = port_id
 )
 cur = conn.cursor()
 
 
+cur.execute(
+   '''CREATE TABLE IF NOT EXISTS book(name VARCHAR, phone VARCHAR)'''
+)
 
 cur.execute(
     '''CREATE OR REPLACE FUNCTION search_from_bk(a VARCHAR, b VARCHAR)
@@ -81,9 +87,9 @@ AS $$
 DECLARE cnt INTEGER;
 BEGIN
     SELECT into cnt (SELECT count(*) FROM book WHERE name = nm);
-	IF cnt IS NOT NULL THEN
+ IF cnt IS NOT NULL THEN
         DELETE FROM book
-		WHERE name=nm;
+  WHERE name=nm;
     END IF;
 END;
 $$;""")
@@ -92,27 +98,27 @@ cur.execute("""CREATE OR REPLACE FUNCTION paginating(a integer, b integer)
 RETURNS SETOF book
 AS $$
    SELECT * FROM book
-	ORDER BY name
-	LIMIT a OFFSET b;
+ ORDER BY name
+ LIMIT a OFFSET b;
 $$
 language sql;""")
 
 
 a = input('search\ninsert\ninsertloop\ndelete\npaginating\n')
 if a == 'search':
-   cur.execute("SELECT search_from_bk('John Doe', '87076002321')")
+   cur.execute("SELECT search_from_bk('Neymar JR', '87076052769')")
    result = cur.fetchall()
    print(result)
 if a == 'insert':
    cur.execute("CALL insert_to_book('Nurtaza Nurasyl','87774545505')")
 if a == 'insertloop':
   cur.execute('''CALL insert_list_of_users(ARRAY[
-    ARRAY['Dimash Amalbek', '87780950826'],
-    ARRAY['Messi', '87471234567'],
-    ARRAY['Ronaldo', '87074510971']
+    ARRAY['Dimash', '87780950826'],
+    ARRAY['Akhamdi', '87025510432'],
+    ARRAY['Rassul', '87086276149']
 ]);''')  
 if a == 'delete':
-   cur.execute("CALL delete_from_book('Leo Messi')")
+   cur.execute("CALL delete_from_book('Rassul')")
 if a == 'paginating':
    cur.execute(
       '''SELECT * FROM paginating(6, 2);'''
